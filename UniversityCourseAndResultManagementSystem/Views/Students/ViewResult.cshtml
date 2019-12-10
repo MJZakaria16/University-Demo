@@ -1,0 +1,125 @@
+﻿@{
+    ViewBag.Title = "ViewResult";
+}
+
+<h2>ViewResult</h2>
+@using (Html.BeginForm())
+{ 
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new {@class = "text-danger"})
+        <div class="form-group">
+            <label class="control-label col-md-2">Department</label>
+            <div class="col-md-10">
+                @Html.DropDownList("Department", (SelectList) ViewBag.Departments, "--Select Department--", htmlAttributes: new {@class = "form-control"})
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2">Student</label>
+            <div class="col-md-10">
+                <select id="Student" class="form-control">
+                    <option value="0">--Select Student--</option>
+                </select>
+                @*@Html.DropDownList("Students", (SelectList) null, "--Select Students--", htmlAttributes: new { @class = "form-control" })*@
+            </div>
+        </div>
+
+    </div>
+
+
+    <table id="example" class="display table table-condensed table-bordered table-striped table-hover table-responsive">
+        <thead>
+        <tr>
+            <th>
+                <span>Course Code</span>
+            </th>
+            <th>
+                <span>Course Name</span>
+            </th>
+            <th>
+                <span>Grade</span>
+            </th>
+        </tr>
+        </thead>
+        <tbody id="Result">
+           @*Result will be load here by jquery...*@
+        </tbody>
+    </table>
+    
+    <label id="nb"></label>
+    
+        }
+
+        @section scripts{
+            <script>
+                $(document).ready(function() {
+                    $("#Department").change(function() {
+                        var deptId = $("#Department").val();
+                        var jsnFormatData = { deptId: deptId };
+                        if (deptId != 0) {
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("GetStudentByDeptId", "Students")',
+                                contentType: "application/json; charset=utf-8",
+                                data: JSON.stringify(jsnFormatData),
+                                dataType: "json",
+
+                                success: function(data) {
+                                    $("#Student").find("option").not(":first").remove();
+                                    $.each(data, function(i) {
+                                        var optionhtml = '<option value="' +
+                                            data[i].StudentId + '">' + data[i].RegNo + '</option>';
+                                        $("#Student").append(optionhtml);
+                                    });
+                                }
+                            });
+                        }
+                        else {
+                            $("#Student").find("option").not(":first").remove();
+                            $("#Result").empty();
+                        }
+
+                        return false;
+                    });
+
+
+                    $("#Student").change(function() {
+                        var studentId = $("#Student").val();
+                        var jsnFormatData = { studentId: studentId };
+                        if (studentId != 0) {
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("GetResultByStudentId", "Students")',
+                                contentType: "application/json; charset=utf-8",
+                                data: JSON.stringify(jsnFormatData),
+                                dataType: "json",
+
+                                success: function(data) {
+                                    $("#Result").empty();
+                                    $.each(data, function(i) {
+                                        var html = '<tr> ' +
+                                            '<td>' + data[i].CourseCode + '</td> ' +
+                                            '<td>' + data[i].CourseName + '</td> ' +
+                                            '<td>' + data[i].Grade + '</td> ' +
+                                            '</tr>';
+
+                                        $("#Result").append(html);
+
+                                    });
+                                }
+                            });
+                        }
+                        else {
+                            $("#Result").empty();
+                        }
+
+                        return false;
+                    });
+
+                });
+
+            </script>
+        }
+
+

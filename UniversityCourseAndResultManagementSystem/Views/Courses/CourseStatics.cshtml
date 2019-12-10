@@ -1,0 +1,77 @@
+﻿@using System.Security.Policy
+@model UniversityCourseAndResultManagementSystem.Models.Department
+@{
+    ViewBag.Title = "CourseStatics";
+}
+
+<h2>CourseStatics</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        <h4>Course Assign</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <label class="control-label col-md-2">Department</label>
+            <div class="col-md-10">
+                @Html.DropDownListFor(m => m.DeptId, (SelectList)ViewBag.Departments, "--Select Department--", htmlAttributes: new { @class = "form-control"})
+                @Html.ValidationMessageFor(m => m.DeptId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+
+    <table id="example" class="display" cellspacing="0">
+        <thead style="background-color: yellowgreen">
+        <tr>
+            <th>Code</th>
+            <th>Name/Title</th>
+            <th>Semester</th>
+            <th>Assigned To</th>
+        </tr>
+        </thead>
+
+        <tbody id="CourseStatics">
+
+        </tbody>
+    </table>
+
+}
+
+@section scripts
+{
+    <script>
+    $(document).ready(function () {
+        $("#DeptId").change(function () {
+            var deptId = $("#DeptId").val();
+            var jsnFormatData = { deptId: deptId };
+            if (deptId != 0) {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetCourseStaticsByDeptId", "Courses")',
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(jsnFormatData),
+                        dataType: "json",
+                        
+                        success: function (data) {
+                            $("#CourseStatics").empty();
+                            $.each(data, function (i) {
+                                var optionhtml = '<tr><td>' + data[i].CourseCode + '</td> <td>'
+                                    + data[i].CourseName + '</td><td>'
+                                    + data[i].Semester + '</td><td>'
+                                    + data[i].TeacherName + '</td></tr>';
+                                $("#CourseStatics").append(optionhtml);
+                            });
+                        }
+                    });
+                }
+                else {
+                    $("#CourseStatics").empty();
+                }
+
+               return false;
+            });
+        });
+    </script>
+}

@@ -1,0 +1,119 @@
+﻿@model IEnumerable<UniversityCourseAndResultManagementSystem.Models.Teacher>
+
+@{
+    ViewBag.Title = "Index";
+}
+<style>
+    table thead tr th {
+        text-align: center;
+    }
+    table tbody tr td {
+        text-align: center;
+    }
+    table tbody tr td a {
+        text-decoration: none;
+    }
+</style>
+<h2>Index</h2>
+<div ng-app="TeacherListApp">
+    <div ng-controller="TeacherController">
+        <p>
+            @Html.ActionLink("Create New", "Create")
+        </p>
+        <div class="alert alert-success" role="alert">Total Teacher: {{CountAllTeachers()}}</div>
+        <table class="display table table-condensed table-bordered table-striped table-hover table-responsive" id="example" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Department.DeptCode)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Designation.DesignationName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TeacherName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Address)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Email)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ContactNo)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CreaditToBeTaken)
+                    </th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Department.DeptCode)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Designation.DesignationName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TeacherName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Address)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Email)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ContactNo)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CreaditToBeTaken)
+                        </td>
+                        <td>
+                            @*@Html.ActionLink("Edit", "Edit", new { id = item.TeacherId }) |
+                            @Html.ActionLink("Details", "Details", new { id = item.TeacherId }) |
+                            @Html.ActionLink("Delete", "Delete", new { id = item.TeacherId })*@
+
+                            <a href="@Url.Action("Edit", "Teachers", new {id = item.TeacherId})">
+                                <span class="glyphicon glyphicon-edit"></span>
+                            </a>|
+                            <a href="@Url.Action("Details", "Teachers", new {id = item.TeacherId})">
+                                <span class=" glyphicon glyphicon-th"></span>
+                        </a>|
+                            <a href="@Url.Action("Delete", "Teachers", new { id = item.TeacherId })">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </a>
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        var teacherListApp = angular.module("TeacherListApp", []);
+        teacherListApp.controller("TeacherController", function($scope,$http) {
+            $scope.allTeachers = [];
+            $http.get('@Url.Action("GetAllTeacher", "Teachers")').success(function(data) {
+                $scope.allTeachers = data;
+            });
+
+            $scope.CountAllTeachers = function() {
+                var countTeacher = 0;
+                angular.forEach($scope.allTeachers, function(aTeacher) {
+                    countTeacher++;
+                });
+                return countTeacher;
+            }
+
+        });
+    </script>
+}

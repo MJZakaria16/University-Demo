@@ -1,0 +1,171 @@
+﻿@using System.Security.Policy
+@model UniversityCourseAndResultManagementSystem.Models.Result
+
+@{
+    ViewBag.Title = "Save Result";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Save Result</h2>
+
+@using (Html.BeginForm())
+{
+
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <label class="control-label col-md-2">Department</label>
+            <div class="col-md-10">
+
+                @Html.DropDownList("DepartmentId", (SelectList)ViewBag.Departments, "--Select Department--", htmlAttributes: new { @class = "form-control", id = "department" })
+                @*@Html.ValidationMessageFor(m => m.DepartmentId, "", new {@class = "text-danger"})*@
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.StudentId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <select id="student" class="form-control">
+                    <option value="0">--Select Student--</option>
+                </select>
+                <br />
+                @*@Html.DropDownList("student", (SelectList)ViewBag.DeptId, "---Select Depatment---", htmlAttributes: new { @class = "form-control" })*@
+                @*@Html.DropDownList("StudentID", (SelectList) ViewBag.StudentList, "--Select Student--", htmlAttributes: new {@class = "form-control",id="student"})*@
+                @Html.ValidationMessageFor(model => model.StudentId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2">Name</label>
+            <div class="col-md-10">
+                <input type="text" id="studentName" readonly class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2">Email</label>
+            <div class="col-md-10">
+                <input type="text" id="studentEmail" readonly class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2">Department</label>
+            <div class="col-md-10">
+                <input type="text" id="studentDepartment" readonly class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CourseId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @* @Html.DropDownList("course", "--Select Course--", htmlAttributes: new { @class = "form-control" })*@
+                <br/>
+                <select class="form-control" id="course">
+                    <option value="0">--Select Course--</option>
+                </select>
+                @Html.ValidationMessageFor(model => model.StudentId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Grade, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("Grade", (SelectList)ViewBag.GradeList, "--Select Grade--", htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Grade, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save Result" class="btn btn-success" />
+            </div>
+        </div>
+
+
+    </div>
+}
+
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+            $("#department").change(function () {
+                var deptId = $("#department").val();
+                var jsnFormatData = { deptId: deptId };
+                if (deptId != 0) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("GetStudentByDeptId", "Students")',
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(jsnFormatData),
+                        dataType: "json",
+
+                        success: function (data) {
+                            $("#student").find("option").not(":first").remove();
+                            $.each(data, function (i) {
+                                var optionhtml = '<option value="' +
+                                    data[i].StudentId + '">' + data[i].RegNo + '</option>';
+                                $("#student").append(optionhtml);
+                            });
+                        }
+                    });
+
+
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("GetCourseByDeptId", "Courses")',
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(jsnFormatData),
+                        dataType: "json",
+
+                        success: function (data) {
+                            $("#course").find("option").not(":first").remove();
+                            $.each(data, function (i) {
+                                var optionhtml = '<option value="' +
+                                    data[i].CourseId + '">' + data[i].CourseName + '</option>';
+                                $("#course").append(optionhtml);
+                            });
+                        }
+                    });
+                }
+                else {
+                    $("#student").find("option").not(":first").remove();
+                    $("#course").find("option").not(":first").remove();
+                    $("#studentName").val("");
+                    $("#studentEmail").val("");
+                    $("#studentDepartment").val("");
+                }
+                return false;
+            });
+            $("#student").change(function () {
+                var studentId = $("#student").val();
+                var jsnFormatData = { studentId: studentId };
+                if (studentId != 0) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("GetStudentByStudentId", "Students")',
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(jsnFormatData),
+                        dataType: "json",
+
+                        success: function (data) {
+                            $("#studentName").val(data.StudentName);
+                            $("#studentEmail").val(data.Email);
+                            $("#studentDepartment").val(data.ContactNo);
+
+                        }
+                    });
+                }
+                else {
+                    $("#studentName").val("");
+                    $("#studentEmail").val("");
+                    $("#studentDepartment").val("");
+                }
+            });
+        });
+    </script>
+}
+
